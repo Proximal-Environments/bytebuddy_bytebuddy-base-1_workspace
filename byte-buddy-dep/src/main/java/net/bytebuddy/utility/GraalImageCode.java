@@ -58,6 +58,16 @@ public enum GraalImageCode {
     NONE(false, false);
 
     /**
+     * Indicates that member properties and annotations should be sorted when being read.
+     */
+    public static final String REPRODUCIBLE_PROPERTIES = "net.bytebuddy.reproducible";
+
+    /**
+     * Resolves if properties should always be sorted at the cost of some runtime overhead.
+     */
+    private static final boolean SORTED = Boolean.parseBoolean(doPrivileged(new GetSystemPropertyAction(REPRODUCIBLE_PROPERTIES)));
+
+    /**
      * The current image code or {@code null} if the image code was not yet resolved. The image code must be
      * initialized lazily to avoid that it's bound to a value during native compilation.
      */
@@ -102,7 +112,7 @@ public enum GraalImageCode {
      * @return The supplied array, potentially sorted.
      */
     public <T> T[] sorted(T[] value, Comparator<? super T> comparator) {
-        if (defined) {
+        if (SORTED || defined) {
             Arrays.sort(value, comparator);
         }
         return value;

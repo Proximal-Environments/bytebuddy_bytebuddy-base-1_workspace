@@ -36,10 +36,7 @@ import net.bytebuddy.description.module.ModuleDescription;
 import net.bytebuddy.dynamic.TargetType;
 import net.bytebuddy.implementation.bytecode.StackSize;
 import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.utility.CompoundList;
-import net.bytebuddy.utility.FieldComparator;
-import net.bytebuddy.utility.GraalImageCode;
-import net.bytebuddy.utility.JavaType;
+import net.bytebuddy.utility.*;
 import net.bytebuddy.utility.dispatcher.JavaDispatcher;
 import net.bytebuddy.utility.nullability.AlwaysNull;
 import net.bytebuddy.utility.nullability.MaybeNull;
@@ -9028,7 +9025,7 @@ public interface TypeDescription extends TypeDefinition, ByteCodeElement, TypeVa
          * {@inheritDoc}
          */
         public TypeList getDeclaredTypes() {
-            return new TypeList.ForLoadedTypes(type.getDeclaredClasses());
+            return new TypeList.ForLoadedTypes(GraalImageCode.getCurrent().sorted(type.getDeclaredClasses(), TypeComparator.INSTANCE));
         }
 
         /**

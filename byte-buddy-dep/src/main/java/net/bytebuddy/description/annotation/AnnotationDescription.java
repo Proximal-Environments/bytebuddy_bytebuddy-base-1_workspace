@@ -1188,7 +1188,7 @@ public interface AnnotationDescription {
         public <T extends Annotation> Builder defineAnnotationArray(String property, Class<T> annotationType, T... annotation) {
             return defineAnnotationArray(property,
                     TypeDescription.ForLoadedType.of(annotationType),
-                    new AnnotationList.ForLoadedAnnotations(annotation).toArray(new AnnotationDescription[0]));
+                    new AnnotationList.ForLoadedAnnotations(Arrays.asList(annotation)).toArray(new AnnotationDescription[0]));
         }
 
         /**

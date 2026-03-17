@@ -19,6 +19,8 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.description.type.TypeList;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.FilterableList;
+import net.bytebuddy.utility.AnnotationComparator;
+import net.bytebuddy.utility.GraalImageCode;
 import net.bytebuddy.utility.nullability.AlwaysNull;
 import net.bytebuddy.utility.nullability.MaybeNull;
 
@@ -227,7 +229,7 @@ public interface AnnotationList extends FilterableList<AnnotationDescription, An
          * @param annotation The represented annotations.
          */
         public ForLoadedAnnotations(Annotation... annotation) {
-            this(Arrays.asList(annotation));
+            this(Arrays.asList(GraalImageCode.getCurrent().sorted(annotation, AnnotationComparator.INSTANCE)));
         }
 
         /**
