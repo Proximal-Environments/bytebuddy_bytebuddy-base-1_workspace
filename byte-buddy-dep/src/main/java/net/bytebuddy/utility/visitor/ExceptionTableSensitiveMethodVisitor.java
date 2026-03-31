@@ -15,6 +15,7 @@
  */
 package net.bytebuddy.utility.visitor;
 
+import net.bytebuddy.utility.nullability.MaybeNull;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -58,7 +59,7 @@ public abstract class ExceptionTableSensitiveMethodVisitor extends MethodVisitor
     protected abstract void onAfterExceptionTable();
 
     @Override
-    public final void visitFrame(int type, int localVariableLength, Object[] localVariable, int stackSize, Object[] stack) {
+    public final void visitFrame(int type, int localVariableLength, @MaybeNull Object[] localVariable, int stackSize, @MaybeNull Object[] stack) {
         considerEndOfExceptionTable();
         onVisitFrame(type, localVariableLength, localVariable, stackSize, stack);
     }
@@ -68,11 +69,11 @@ public abstract class ExceptionTableSensitiveMethodVisitor extends MethodVisitor
      *
      * @param type                The type of stack map frame.
      * @param localVariableLength The length of the local variable array.
-     * @param localVariable       An array containing type symbols for all values in the local variable array.
+     * @param localVariable       An array containing type symbols for all values in the local variable array or {@code null} if none.
      * @param stackSize           The size of the operand stack.
-     * @param stack               An array containing type symbols for all values on the operand stack.
+     * @param stack               An array containing type symbols for all values on the operand stack or {@code null} if none.
      */
-    protected void onVisitFrame(int type, int localVariableLength, Object[] localVariable, int stackSize, Object[] stack) {
+    protected void onVisitFrame(int type, int localVariableLength, @MaybeNull Object[] localVariable, int stackSize, @MaybeNull Object[] stack) {
         super.visitFrame(type, localVariableLength, localVariable, stackSize, stack);
     }
 
