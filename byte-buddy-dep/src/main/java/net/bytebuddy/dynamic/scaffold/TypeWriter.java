@@ -70,6 +70,7 @@ import net.bytebuddy.utility.nullability.MaybeNull;
 import net.bytebuddy.utility.nullability.UnknownNull;
 import net.bytebuddy.utility.privilege.GetSystemPropertyAction;
 import net.bytebuddy.utility.visitor.ContextClassVisitor;
+import net.bytebuddy.utility.visitor.ExceptionTableSensitiveMethodVisitor;
 import net.bytebuddy.utility.visitor.MetadataAwareClassVisitor;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -4465,7 +4466,7 @@ public interface TypeWriter<T> {
                     /**
                      * An initialization handler that appends code to a previously visited type initializer.
                      */
-                    abstract class Appending extends MethodVisitor implements InitializationHandler, TypeInitializer.Drain {
+                    abstract class Appending extends ExceptionTableSensitiveMethodVisitor implements InitializationHandler, TypeInitializer.Drain {
 
                         /**
                          * The instrumented type.
@@ -4600,6 +4601,10 @@ public interface TypeWriter<T> {
                         public void visitCode() {
                             record.applyAttributes(mv, annotationValueFilterFactory);
                             super.visitCode();
+                        }
+
+                        @Override
+                        protected void onAfterExceptionTable() {
                             onStart();
                         }
 
@@ -4609,8 +4614,8 @@ public interface TypeWriter<T> {
                         protected abstract void onStart();
 
                         @Override
-                        public void visitFrame(int type, int localVariableLength, @MaybeNull Object[] localVariable, int stackSize, @MaybeNull Object[] stack) {
-                            super.visitFrame(type, localVariableLength, localVariable, stackSize, stack);
+                        protected void onVisitFrame(int type, int localVariableLength, @MaybeNull Object[] localVariable, int stackSize, @MaybeNull Object[] stack) {
+                            super.onVisitFrame(type, localVariableLength, localVariable, stackSize, stack);
                             frameWriter.onFrame(type, localVariableLength);
                         }
 
@@ -4869,11 +4874,11 @@ public interface TypeWriter<T> {
                                 }
 
                                 @Override
-                                public void visitInsn(int opcode) {
+                                protected void onVisitInsn(int opcode) {
                                     if (opcode == Opcodes.RETURN) {
                                         mv.visitJumpInsn(Opcodes.GOTO, label);
                                     } else {
-                                        super.visitInsn(opcode);
+                                        super.onVisitInsn(opcode);
                                     }
                                 }
 
@@ -5013,11 +5018,11 @@ public interface TypeWriter<T> {
                                 }
 
                                 @Override
-                                public void visitInsn(int opcode) {
+                                protected void onVisitInsn(int opcode) {
                                     if (opcode == Opcodes.RETURN) {
                                         mv.visitJumpInsn(Opcodes.GOTO, label);
                                     } else {
-                                        super.visitInsn(opcode);
+                                        super.onVisitInsn(opcode);
                                     }
                                 }
 

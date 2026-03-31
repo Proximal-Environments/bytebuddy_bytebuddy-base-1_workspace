@@ -2428,6 +2428,28 @@ public class AdviceTest {
         Advice.to(SelfCallHandleIllegalSample.class);
     }
 
+    @Test
+    public void testTypeInitializerExceptionHandlingRetainedOnRebase() throws Exception {
+        Class<?> type = new ByteBuddy()
+                .rebase(TypeInitializerWithExceptionHandlingSample.class)
+                .visit(Advice.to(TypeInitializerWithExceptionHandlingAdvice.class).on(ElementMatchers.isTypeInitializer()))
+                .make()
+                .load(ClassLoadingStrategy.BOOTSTRAP_LOADER, ClassLoadingStrategy.Default.WRAPPER)
+                .getLoaded();
+        assertThat(type.getDeclaredField("handled").get(null), is((Object) true));
+    }
+
+    @Test
+    public void testTypeInitializerExceptionHandlingRetainedOnRedefine() throws Exception {
+        Class<?> type = new ByteBuddy()
+                .redefine(TypeInitializerWithExceptionHandlingSample.class)
+                .visit(Advice.to(TypeInitializerWithExceptionHandlingAdvice.class).on(ElementMatchers.isTypeInitializer()))
+                .make()
+                .load(ClassLoadingStrategy.BOOTSTRAP_LOADER, ClassLoadingStrategy.Default.WRAPPER)
+                .getLoaded();
+        assertThat(type.getDeclaredField("handled").get(null), is((Object) true));
+    }
+
     @SuppressWarnings("unused")
     public static class Sample {
 
@@ -4339,6 +4361,29 @@ public class AdviceTest {
         @Advice.OnMethodExit
         static void exit() {
             /* do nothing */
+        }
+    }
+
+    public static class TypeInitializerWithExceptionHandlingSample {
+
+        public static boolean handled = false;
+
+        static {
+            try {
+                throw new Exception();
+            } catch (Exception e) {
+                handled = true;
+            }
+        }
+    }
+
+    public static class TypeInitializerWithExceptionHandlingAdvice {
+
+        @Advice.OnMethodExit(onThrowable = Throwable.class, inline = true)
+        static void exit(
+                @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object returning,
+                @Advice.Thrown(readOnly = false, typing = Assigner.Typing.DYNAMIC) Throwable throwing
+        ) {
         }
     }
 }
